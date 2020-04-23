@@ -1,7 +1,10 @@
 # demo-web
 
 > A Vue.js project
+
 1.采用vue-cli技术搭建前端项目，搭建命令：
+
+
 首先安装npm阿里镜像
 npm i -g cnpm --registry=https://registry.npm.taobao.org
 
