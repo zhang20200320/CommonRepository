@@ -15,11 +15,13 @@ vue -V
 cnpm install -g webpack
 
 工具安装完成后，开始创建项目（此时要根据提示进行操作，项目名称，描述，作者等等，还有yes/no
-根据提示填写，然后直接enter）
+根据提示填写，然后直接enter）       
+
 vue init webpack 项目名
 
 项目已创建完成，但是确实nodo_modules文件夹（文件夹是整个项目依赖包的文件夹）
-接下来cd进入到项目目录下，cnpm install (如果安装了阿里的镜像，用cnpm代替npm，，否则还是npm就好)
+接下来cd进入到项目目录下，(如果安装了阿里的镜像，用cnpm代替npm，，否则还是npm就好)
+cnpm install 
 
 完成后就可以使用IDE导入项目进行开发了，，
 我用的是IDEA(要安装相关插件)
