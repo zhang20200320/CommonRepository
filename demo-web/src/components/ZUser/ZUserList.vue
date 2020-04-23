@@ -38,9 +38,9 @@
       return {
         user: {'username': '', 'phoneNumber': ''},
         zUsers: [
-          {'username': '李磊', 'phoneNumber': '18292000000'},
-          {'username': '张成', 'phoneNumber': '18292000000'},
-          {'username': '炼心', 'phoneNumber': '18292000000'}
+          {'username': '张三', 'phoneNumber': '18292000000'},
+          {'username': '李四', 'phoneNumber': '18292000000'},
+          {'username': '王麻子', 'phoneNumber': '18292000000'}
         ]
       }
     },
