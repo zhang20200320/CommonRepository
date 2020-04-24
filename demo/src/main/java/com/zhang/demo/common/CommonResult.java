@@ -1,5 +1,10 @@
 package com.zhang.demo.common;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 通用返回对象
  * Created by macro on 2019/4/19.
@@ -35,6 +40,17 @@ public class CommonResult<T> {
      */
     public static <T> CommonResult<T> success(T data, String message) {
         return new CommonResult<T>(ResultCode.SUCCESS.getCode(), message, data);
+    }
+
+    /**
+     * 成功返回结果
+     *
+     * @param message 提示信息
+     */
+    public static <T> CommonResult<T> success(String message, String resultData) {
+        Map<String, String> resultDataMap = new HashMap<String, String>();
+        resultDataMap.put("url", resultData);
+        return new CommonResult<T>(ResultCode.SUCCESS.getCode(), message, (T) resultDataMap);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.zhang.demo.controller;
 
 import com.zhang.demo.common.Annotation.NoRepeatSubmit;
 import com.zhang.demo.common.CommonResult;
+import com.zhang.demo.common.utils.DateUtils;
 import com.zhang.demo.dto.ZUserDto;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.form.ZUserForm;
@@ -14,8 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 用户
@@ -66,6 +73,29 @@ public class ZUserController {
                                               @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
         List<ZUserEntity> zUserList = zUserService.list(keyword, pageSize, pageNum);
         return CommonResult.success(zUserList);
+    }
+
+    @PostMapping(value = "/uploadFile")
+    public CommonResult<ZUserForm> uploadFile(MultipartFile file, HttpServletRequest req) throws IOException {
+        logger.info("开始上传...");
+        String format = DateUtils.format(new Date(), "/yyyy/MM/dd/");
+        String realPath = req.getServletContext().getRealPath("/upload") + format;
+        File folder = new File(realPath);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        String oldName = file.getOriginalFilename();
+//        String newName = UUID.randomUUID().toString() + oldName.substring(oldName.lastIndexOf("."));
+//        String newName = oldName.substring(0, oldName.indexOf("."));;// 截取指定字符之前的字符串
+        String newName = oldName;
+        file.transferTo(new File(folder,newName));
+        String url1 = realPath + newName;
+        String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + "/upload" + format + newName;
+        System.out.println(url1);
+        System.out.println(url);
+        logger.info("上传成功");
+
+        return CommonResult.success("上传成功", url);
     }
 
 
