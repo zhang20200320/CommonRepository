@@ -15,6 +15,7 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
   resources:
     static-locations: classpath:/static/,classpath:/views/
+
   #redis
   redis:
     open: true
@@ -29,6 +30,17 @@ spring:
         max-wait: -1ms
         max-idle: 8
         min-idle: 0
+
+  #elasticsearch
+  data:
+    elasticsearch:
+      # elasticsearch集群名称，默认的是elasticsearch
+      cluster-name: zhangElasticsearch
+      #节点的地址 注意api模式下端口号是9300，千万不要写成9200
+      cluster-nodes: 127.0.0.1:9300
+      #是否开启本地存储
+      repositories:
+        enable: true
 
 
 
