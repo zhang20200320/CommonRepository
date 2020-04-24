@@ -2,6 +2,8 @@ package com.zhang.demo.common.Aspect;
 
 import com.zhang.demo.common.Annotation.NoRepeatSubmit;
 import com.zhang.demo.common.CommonResult;
+import com.zhang.demo.common.ResultCode;
+import com.zhang.demo.common.utils.R1;
 import com.zhang.demo.common.utils.RedisUtils;
 import com.zhang.demo.common.utils.RequestUtils;
 import org.aspectj.lang.annotation.Aspect;
@@ -68,8 +70,11 @@ public class RepeatSubmitAspect {
             // 获取锁失败，认为是重复提交的请求
             LOGGER.info("tryLock fail重复请求请稍后再试, key = [{}]", key);
             // (1221, "重复请求，请稍后再试", null);
-            return CommonResult.repeatSubmitFailed(1221, "已提交，不可重复提交，请稍等..");
+//            return CommonResult.repeatSubmitFailed(1221, "已提交，不可重复提交，请稍等..");
+//            return ResultCode.REPEAT_SUBMIT;
+            return R1.error(1221, "重复请求，请稍后再试");
         }
+
 
     }
 
