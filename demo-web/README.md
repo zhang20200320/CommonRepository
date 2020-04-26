@@ -26,16 +26,15 @@ vue init webpack 项目名
 项目已创建完成，但是缺少nodo_modules文件夹（文件夹是整个项目依赖包的文件夹）
 接下来cd进入到项目目录下，(如果安装了阿里的镜像，用cnpm代替npm，，否则还是npm就好)  
 cnpm install   
+完成后就可以使用IDE导入项目进行开发了。    
 
----
-完成后就可以使用IDE导入项目进行开发了，，
-我用的是IDEA(要安装相关插件)
-在setting中的plugins中搜索Vue.js插件并安装
+===
+我用的是IDEA(要安装相关插件)，在setting中的plugins中搜索Vue.js插件并安装
 
-运行项目命令(同理，，如果安装了阿里的镜像，用cnpm代替npm)  
+运行项目命令(同理，，如果安装了阿里的镜像，用cnpm代替npm)    
 cnpm run dev 
 
-完成后在浏览器输入地址访问，看到Vue图标表示成功  
+完成后在浏览器输入地址访问，看到Vue图标表示成功    
 http://localhost:8080
 
 
