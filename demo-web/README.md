@@ -1,6 +1,8 @@
 # demo-web
 
 > A Vue.js project
+===
+
 
 1.采用vue-cli技术搭建前端项目，搭建命令：
 
