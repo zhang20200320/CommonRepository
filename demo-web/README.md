@@ -3,38 +3,31 @@
 > A Vue.js project
 
 ## 搭建vue项目步骤
-1.采用vue-cli技术搭建前端项目，搭建命令：
-
-
-首先安装npm阿里镜像  
+采用vue-cli技术搭建前端项目，搭建命令：  
+1.首先安装npm阿里镜像  
 npm i -g cnpm --registry=https://registry.npm.taobao.org  
 
-安装vue脚手架工具vue-cli  
+2.安装vue脚手架工具vue-cli  
 npm i -g vue-cli  
 
-测试是否安装成功（-V 要求大写）：  
+3.测试是否安装成功（-V 要求大写）：  
 vue -V   
 
-安装webpack工具  
+4.安装webpack工具  
 cnpm install -g webpack  
 
-工具安装完成后，开始创建项目（此时要根据提示进行操作，项目名称，描述，作者等等，还有yes/no
-根据提示填写，然后直接enter）       
-
+5.工具安装完成后，开始创建项目（此时要根据提示进行操作，项目名称，描述，作者等等，还有yes/no
+根据提示填写，然后直接enter）         
 vue init webpack 项目名  
 
-项目已创建完成，但是缺少nodo_modules文件夹（文件夹是整个项目依赖包的文件夹）
+6.项目已创建完成，但是缺少nodo_modules文件夹（文件夹是整个项目依赖包的文件夹）
 接下来cd进入到项目目录下，(如果安装了阿里的镜像，用cnpm代替npm，，否则还是npm就好)  
 cnpm install   
-完成后就可以使用IDE导入项目进行开发了。    
-
-----
-我用的是IDEA(要安装相关插件)，在setting中的plugins中搜索Vue.js插件并安装
-
-运行项目命令(同理，，如果安装了阿里的镜像，用cnpm代替npm)    
+完成后就可以使用IDE导入项目进行开发了。我用的是IDEA(要安装相关插件)，在setting中的plugins中搜索Vue.js插件并安装。      
+7.运行项目命令(同理，，如果安装了阿里的镜像，用cnpm代替npm)      
 cnpm run dev 
 
-完成后在浏览器输入地址访问，看到Vue图标表示成功    
+完成后在浏览器输入地址访问，看到Vue图标表示成功      
 http://localhost:8080
 
 
