@@ -6,16 +6,16 @@
 1.采用vue-cli技术搭建前端项目，搭建命令：
 
 
-首先安装npm阿里镜像
+首先安装npm阿里镜像  
 npm i -g cnpm --registry=https://registry.npm.taobao.org
 
-安装vue脚手架工具vue-cli
+安装vue脚手架工具vue-cli  
 npm i -g vue-cli
 
-测试是否安装成功（-V 要求大写）：
+测试是否安装成功（-V 要求大写）：  
 vue -V 
 
-安装webpack工具
+安装webpack工具  
 cnpm install -g webpack
 
 工具安装完成后，开始创建项目（此时要根据提示进行操作，项目名称，描述，作者等等，还有yes/no
