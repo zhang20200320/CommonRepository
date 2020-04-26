@@ -28,7 +28,7 @@ vue init webpack 项目名
 cnpm install   
 完成后就可以使用IDE导入项目进行开发了。    
 
-======
+----
 我用的是IDEA(要安装相关插件)，在setting中的plugins中搜索Vue.js插件并安装
 
 运行项目命令(同理，，如果安装了阿里的镜像，用cnpm代替npm)    
