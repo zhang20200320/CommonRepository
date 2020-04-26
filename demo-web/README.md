@@ -1,9 +1,8 @@
 # demo-web
 
 > A Vue.js project
-===
 
-
+## 搭建vue项目步骤
 1.采用vue-cli技术搭建前端项目，搭建命令：
 
 
