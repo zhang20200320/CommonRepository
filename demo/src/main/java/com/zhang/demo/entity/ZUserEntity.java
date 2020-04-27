@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.zhang.demo.form.ZUserForm;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 /**
  *
@@ -67,11 +68,9 @@ public class ZUserEntity implements Serializable {
 	 * @param zUserForm
 	 */
 	public ZUserEntity(ZUserForm zUserForm) {
-//		BeanUtils.copyProperties(zUserForm, ZUserEntity.class);
+		BeanUtils.copyProperties(zUserForm, this);
 		this.id = UUID.randomUUID().toString();
-		this.username = zUserForm.getUsername();
-		this.password = zUserForm.getPassword();
-		this.phoneNumber = zUserForm.getPhoneNumber();
+		this.createTime = new Date();
 		this.isDelete = 0;
 	}
 }
