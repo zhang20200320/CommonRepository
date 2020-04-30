@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>getCaptcha111</title>
+
+    <style type="text/css">
+        * {
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+        }
+        input {
+            width: 320px;
+            height: 24px;
+            border: 1px solid #999;
+            border-radius: 4px;
+        }
+        .form .txt {
+            display: block;
+            float: left;
+            width: 340px;
+            height: 40px;
+            line-height: 40px;
+            padding-left: 16px;
+         }
+        button {
+            width: 56px;
+            height: 24px;
+            background-color: green;
+            border: 0;
+            border-radius: 4px;
+            color: white;
+         }
+
+    </style>
+
+</head>
+
+
+
+<body>
+    <form action="/user/login" method="post">
+        <p><input type="text" name="username" placeholder="请输入用户名" ></p>
+        <p><input type="password" name="password" placeholder="请设置密码" maxlength="16"></p>
+        <p>
+            <input type="text" placeholder="请输入验证码" maxlength="4">
+            <img src="/user/getCaptcha111" onclick="this.src=this.src+'?'+Math.random()" id="img">
+            <a href="#" onclick="document.getElementById('img').onclick()">换一张?</a>
+        </p>
+        <p><input type="button" onclick="login()" value="登录"></p>
+    </form>
+</body>
+
+<script type="text/javascript">
+    function login() {
+        if(document.getElementById("username").value=="") {
+            alert("用户名不能为空！");
+            return false;
+        } else if(document.getElementById("password").value=="") {
+            alert("密码不能为空！");
+            return false;
+        } else {
+            alert("提交成功！")
+            return true;
+        }
+    }
+
+</script>
+
+</html>
