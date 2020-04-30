@@ -2,19 +2,25 @@ package com.zhang.demo.controller;
 
 import com.zhang.demo.common.Annotation.NoRepeatSubmit;
 import com.zhang.demo.common.CommonResult;
+import com.zhang.demo.common.utils.RedisUtils;
+import com.zhang.demo.common.utils.VerifyUtils;
 import com.zhang.demo.entity.ZUserEntity;
+import com.zhang.demo.form.ZCaptchaForm;
 import com.zhang.demo.form.ZUserForm;
 import com.zhang.demo.service.ZUserService;
 import com.zhang.demo.vo.ZUserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,6 +36,9 @@ public class ZUserController {
 
     @Autowired
     private ZUserService zUserService;
+
+    @Autowired
+    private RedisUtils redisUtils;
 
     /**
      * 注册
@@ -101,5 +110,87 @@ public class ZUserController {
         return CommonResult.success("上传成功", zUserService.uploadFile(file, req));
     }
 
+    /**
+     * 获取图片验证码
+     * 后台创建图片验证码，并redis缓存验证码字符
+     * 返回图片验证码byte[]
+     * @param ip 调用接口客户端本地ip地址
+     */
+    @GetMapping(value = "/getCaptcha/{ip}")
+    public CommonResult<byte[]> getCaptcha(@PathVariable String ip, HttpServletRequest req) {
+        logger.info("获取中...");
+
+        Object[] imageCaptchaInfo = VerifyUtils.createImage();
+
+        System.out.println("imageCaptcha result ： " + imageCaptchaInfo);
+        if (imageCaptchaInfo == null || imageCaptchaInfo.length != 2) {
+            return CommonResult.failed("Failed to get picture verification code");
+        }
+        String randmStr = (String) imageCaptchaInfo[0];
+        redisUtils.set("captcha_" + ip, randmStr);
+        Object[] b = (Object[])imageCaptchaInfo;
+        System.out.println("imageCaptchaInfo[] result: " + Arrays.deepToString(imageCaptchaInfo));
+
+        /**图片byte[]数组转图片保存指定目录，并返回访问地址*/
+        String url = VerifyUtils.byte2image((byte[]) imageCaptchaInfo[1], req);
+        System.out.println("url: " + url);
+
+        /**指定地址图片文件转byte[]数组*/
+        String url1 = "E:\\projects\\CommonProjects\\demo\\target\\classes\\static\\images\\imageCaptcha\\captcha.jpg";
+        byte[] imageByte = VerifyUtils.image2byte(url1);
+        System.out.println("imageByte[]: " + Arrays.toString(imageByte));
+
+        logger.info("获取成功");
+        return CommonResult.success("获取图片验证码地址：" + url);
+    }
+
+    /**
+     * 生成验证码并返回客户端
+     * 验证码字符缓存在session中
+     * @param request
+     * @param response
+     */
+    @GetMapping(value = "/getCaptcha111")
+    public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("获取中...");
+
+        try {
+            response.setContentType("image/jpeg");//设置相应类型,告诉浏览器输出的内容为图片
+            response.setHeader("Pragma", "No-cache");//设置响应头信息，告诉浏览器不要缓存此内容
+            response.setHeader("Cache-Control", "no-cache");
+            response.setDateHeader("Expire", 0);
+            VerifyUtils.createImage1(request, response);//输出验证码图片方法
+        } catch (Exception e) {
+            logger.error("获取验证码失败");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 校验验证码
+     *
+     * @param zCaptchaForm
+     * @return
+     */
+    @PostMapping("/verify")
+    public CommonResult<String> sendCaptcha(@Validated @RequestBody ZCaptchaForm zCaptchaForm) {
+        logger.info("开始校验");
+        // 验证
+        String ip = zCaptchaForm.getIp();
+        String captcha = zCaptchaForm.getCaptcha();
+        String  redisCaptcha = redisUtils.get("captcha_" + ip);
+        if (StringUtils.isEmpty(redisCaptcha)) {
+            logger.info("校验失败");
+            return CommonResult.failed("验证码获取失败");
+        }
+        if (StringUtils.isEmpty(redisCaptcha) || !captcha.equalsIgnoreCase(redisCaptcha)) {
+            logger.info("校验失败");
+            return CommonResult.failed("验证失败");
+        } else {
+            logger.info("校验成功");
+            return CommonResult.success("验证成功");
+        }
+
+    }
 
 }

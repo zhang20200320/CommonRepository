@@ -7,6 +7,8 @@ import com.zhang.demo.vo.ZUserVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -43,6 +45,21 @@ public interface ZUserService extends IService<ZUserEntity> {
     ZUserVo queryZUserInfo(String userId);
 
     String uploadFile(MultipartFile file, HttpServletRequest req) throws IOException;
+
+    /**
+     * 生成验证码
+     * @param request
+     * @param response
+     */
+    void getVerify(HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 忘记密码页面校验验证码
+     * @param verifyInput
+     * @param session
+     * @return
+     */
+    boolean checkVerify(String verifyInput, HttpSession session);
 
 }
 

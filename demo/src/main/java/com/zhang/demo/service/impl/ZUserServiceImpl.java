@@ -1,7 +1,9 @@
 package com.zhang.demo.service.impl;
 
 import com.zhang.demo.common.CommonResult;
-import com.zhang.demo.common.utils.DateUtils;
+import com.zhang.demo.common.utils.Constant;
+import com.zhang.demo.common.utils.RandomValidateCodeUtil;
+import com.zhang.demo.common.utils.VerifyUtils;
 import com.zhang.demo.form.ZUserForm;
 import com.zhang.demo.vo.ZUserVo;
 import org.slf4j.Logger;
@@ -13,14 +15,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhang.demo.dao.ZUserDao;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.service.ZUserService;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service("zUserService")
@@ -73,22 +78,76 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
     @Override
     public String uploadFile(MultipartFile file, HttpServletRequest req) throws IOException {
         logger.info("开始上传...");
-        String format = DateUtils.format(new Date(), "/yyyy/MM/dd/");
-        String realPath = req.getServletContext().getRealPath("/upload") + format;
-        File folder = new File(realPath);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-        String oldName = file.getOriginalFilename();
-//        String newName = UUID.randomUUID().toString() + oldName.substring(oldName.lastIndexOf("."));
-//        String newName = oldName.substring(0, oldName.indexOf("."));;// 截取指定字符之前的字符串
-        String newName = oldName;
-        file.transferTo(new File(folder,newName));
-        String url1 = realPath + newName;
-        String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + "/upload" + format + newName;
-        System.out.println(url1);
-        System.out.println(url);
+
+        // 存储路径(resources-static-upload)
+//        String fileDirPath = new String(Constant.ROOT_DIRECTORY + Constant.IMAGES_URL); // 项目中存储文件
+        // 存储路径(F-uploadFileDirs-images)
+//        String fileDirPath2 = new String(Constant.LOCAL_FILE_URL + File.separator + "images"); // 本地存储文件
+        // 存储路径(C-user-01)
+//        String realPath = req.getServletContext().getRealPath("/upload");
+        // 存储路径(target-classes-static-upload)
+        String fileDirPath = ResourceUtils.getURL("classpath:").getPath().concat(Constant.IMAGES_URL);
+
+        System.out.println("path: " + fileDirPath);
+        File fileDir = VerifyUtils.isExistsDirectory(fileDirPath);
+
+        String fileName = file.getOriginalFilename(); // 文件名称（xxx.jpg）
+
+        // 截取字符串
+//        String suffix = UUID.randomUUID().toString() + fileName.substring(oldName.lastIndexOf("."));
+//        String fileName = fileName.substring(0, fileName.indexOf("."));;// 截取指定字符之前的字符串
+
+        String absolutePath = fileDir.getAbsolutePath(); // 绝对路径
+        System.out.println("fileDir.getAbsolutePath(): " + absolutePath);
+        String newFileName = UUID.randomUUID().toString() + fileName.substring(fileName.lastIndexOf("."));
+        File newFile = new File(absolutePath + File.separator + newFileName);
+        file.transferTo(newFile); // 转存文件到指定路径
+
+//        String url = fileDirPath2 + File.separator + newFileName; // 本地存储路径
+        String url = req.getScheme().concat("://") + req.getServerName().concat(":") + req.getServerPort()
+                + "/upload/".concat(newFileName);
+        System.out.println("url: " + url);
+
+//        newFile.delete(); // 删除临时创建的文件
+
         logger.info("上传成功");
         return url;
     }
+
+    @Override
+    public void getVerify(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            response.setContentType("image/jpeg");//设置相应类型,告诉浏览器输出的内容为图片
+            response.setHeader("Pragma", "No-cache");//设置响应头信息，告诉浏览器不要缓存此内容
+            response.setHeader("Cache-Control", "no-cache");
+            response.setDateHeader("Expire", 0);
+            RandomValidateCodeUtil randomValidateCode = new RandomValidateCodeUtil();
+            randomValidateCode.getRandcode(request, response);//输出验证码图片方法
+        } catch (Exception e) {
+            logger.error("获取验证码失败");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean checkVerify(String verifyInput, HttpSession session) {
+        try {
+            //从session中获取随机数
+            String random = (String) session.getAttribute("RANDOMVALIDATECODEKEY");
+            if (random == null) {
+                return false;
+            }
+            if (random.equals(verifyInput)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("验证码校验失败");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 }
