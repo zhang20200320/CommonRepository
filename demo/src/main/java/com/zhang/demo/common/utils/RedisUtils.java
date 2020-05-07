@@ -89,6 +89,9 @@ public class RedisUtils {
 
 
     /**
+     * 参考链接：https://blog.csdn.net/qq_41793222/article/details/83063370 —— 【请求去重】java基于分布式锁解决重复请求问题
+     *         https://blog.csdn.net/u010096717/article/details/84562926 —— Java使用Redis实现分布式锁来防止重复提交问题
+     *
      *  通过 setnx给redis赋值key-value(在value中加入过期时间)
      *      1.如果key不存在则正常通过 setnx给redis赋值key-value；
      *      2.如果key存在，则获取value值截取过期时间，和当前时间做判断
