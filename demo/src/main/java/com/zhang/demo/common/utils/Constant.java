@@ -21,5 +21,13 @@ public class Constant {
      * 本地磁盘目录
      */
     public static final String LOCAL_FILE_URL = "F:\\uploadFileDirs";
+    /**
+     * 存放在二维码中的内容
+     */
+    public static final String MY_BLOG_ADDRESS = "https://blog.csdn.net/weixin_39960529";
+    /**
+     * 生成的二维码保存路径
+     */
+    public static final String QRCODE_STORAGE_PATH = "e:/photo/";
 
 }

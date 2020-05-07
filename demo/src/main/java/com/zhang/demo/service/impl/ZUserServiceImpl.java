@@ -8,6 +8,7 @@ import com.zhang.demo.form.ZUserForm;
 import com.zhang.demo.vo.ZUserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhang.demo.dao.ZUserDao;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.service.ZUserService;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 //import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -147,6 +151,44 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    /**
+     * 测试方法间互相调用，事务的传播特性以及回滚
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void testUser1(){
+
+        // 未使用代理
+//        this.testUser2();
+
+        // 使用代理
+        ZUserServiceImpl  zUserServiceImpl = (ZUserServiceImpl) AopContext.currentProxy();
+        zUserServiceImpl.testUser2();
+        //异常
+        System.out.println("testUser1()");
+        this.test();
+        int a = 10/0;
+
+    }
+
+    @Transactional
+    public void testUser2(){
+        this.test();
+        System.out.println("testUser2()");
+//        int a = 10/0;
+    }
+
+    public void test(){
+        ZUserEntity zUserEntity = new ZUserEntity();
+        zUserEntity.setId("b24e3af2-9627-4752-b19a-e55c2a7cc37c");
+        zUserEntity.setUsername("zhang01");
+        zUserEntity.setPhoneNumber("18292000007");
+        zUserEntity.setUpdateBy("zhang");
+        zUserEntity.setUpdateTime(new Date());
+        zUserService.updateById(zUserEntity);
+        list(null, 5,1);
     }
 
 

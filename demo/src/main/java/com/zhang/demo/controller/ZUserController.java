@@ -2,6 +2,8 @@ package com.zhang.demo.controller;
 
 import com.zhang.demo.common.Annotation.NoRepeatSubmit;
 import com.zhang.demo.common.CommonResult;
+import com.zhang.demo.common.utils.Constant;
+import com.zhang.demo.common.utils.QRCode.QRCodeUtil;
 import com.zhang.demo.common.utils.RedisUtils;
 import com.zhang.demo.common.utils.VerifyUtils;
 import com.zhang.demo.entity.ZUserEntity;
@@ -56,7 +58,7 @@ public class ZUserController {
      * @param zUserForm
      * @return
      */
-    @PostMapping(value = "/login")
+    @RequestMapping(value = "/login")
     public CommonResult<ZUserForm> login(@Validated(value = {ZUserForm.ZUserLogin .class}) @RequestBody ZUserForm zUserForm) {
         logger.info("登陆中...");
 
@@ -152,7 +154,7 @@ public class ZUserController {
      */
     @GetMapping(value = "/getCaptcha111")
     public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
-        logger.info("获取中...");
+        logger.info("生成中...");
 
         try {
             response.setContentType("image/jpeg");//设置相应类型,告诉浏览器输出的内容为图片
@@ -164,6 +166,7 @@ public class ZUserController {
             logger.error("获取验证码失败");
             e.printStackTrace();
         }
+        logger.info("生成成功");
     }
 
     /**
@@ -191,6 +194,68 @@ public class ZUserController {
             return CommonResult.success("验证成功");
         }
 
+    }
+
+    /**
+     * 生成二维码
+     * @return
+     */
+    @GetMapping("/createQRCode")
+    public String createQRCode(){
+        logger.info("生成中...");
+        // 内容
+        String text = Constant.MY_BLOG_ADDRESS;
+        // 嵌入二维码的图片路径E:\photo
+        String imgPath = Constant.QRCODE_STORAGE_PATH.concat("zhang.jpg");
+        // 生成的二维码的路径及名称
+        String destPath = Constant.QRCODE_STORAGE_PATH.concat("QRCodeImages.jpg");
+        String str = "";
+
+        try {
+            //生成二维码
+            QRCodeUtil.encode(text, imgPath, destPath, true);
+            // 解析二维码
+            str = QRCodeUtil.decode(destPath);
+        }catch (Exception e) {
+            System.out.println("生成/解析二维码异常：" + e);
+        }
+        logger.info("生成成功");
+
+        // 打印出解析出的内容
+        System.out.println(str);
+        return str;
+    }
+
+
+    /**
+     * 生成二维码并返回客户端
+     * @param response
+     */
+    @GetMapping(value = "/getQRCode")
+    public void getQRCode(HttpServletResponse response) {
+        logger.info("获取中...");
+
+        try {
+            response.setContentType("image/jpg");//设置相应类型,告诉浏览器输出的内容为图片
+            response.setHeader("Pragma", "No-cache");//设置响应头信息，告诉浏览器不要缓存此内容
+            response.setHeader("Cache-Control", "no-cache");
+            response.setDateHeader("Expire", 0);
+            // 生成二维码并写入到OutputStream中输出
+            QRCodeUtil.encode(Constant.MY_BLOG_ADDRESS, Constant.QRCODE_STORAGE_PATH.concat("zhang.jpg")
+                    , response.getOutputStream(), true);
+        } catch (Exception e) {
+            logger.error("获取二维码失败");
+            e.printStackTrace();
+        }
+        logger.info("获取成功");
+    }
+
+    /**
+     * 测试方法间互相调用，事务的传播特性以及回滚
+     */
+    @GetMapping("/test")
+    public void test(){
+        zUserService.testUser1();
     }
 
 }

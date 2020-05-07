@@ -48,23 +48,55 @@
             <img src="/user/getCaptcha111" onclick="this.src=this.src+'?'+Math.random()" id="img">
             <a href="#" onclick="document.getElementById('img').onclick()">换一张?</a>
         </p>
-        <p><input type="button" onclick="login()" value="登录"></p>
+        <p><input type="submit" onclick="login" value="登录"></p>
     </form>
 </body>
 
 <script type="text/javascript">
     function login() {
-        if(document.getElementById("username").value=="") {
-            alert("用户名不能为空！");
-            return false;
-        } else if(document.getElementById("password").value=="") {
-            alert("密码不能为空！");
-            return false;
-        } else {
-            alert("提交成功！")
-            return true;
-        }
+        $.ajax({
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            url: "/user/login",
+            data: JSON.stringify(data.field),
+            dataType: 'json',
+            success: function(result) {
+                if(result.code === 0) {
+                    layer.msg('注册成功！');
+                } else {
+                    layer.msg(result.msg);
+                }
+            }
+        });
     }
+
+
+    // function login() {
+    //     if(document.getElementById("username").value==="") {
+    //         alert("用户名不能为空！");
+    //         return false;
+    //     } else if(document.getElementById("password").value==="") {
+    //         alert("密码不能为空！");
+    //         return false;
+    //     } else {
+    //         alert("提交成功！")
+    //         return true;
+    //     }
+    //     $.ajax({
+    //         type: "POST",
+    //         contentType: "application/json;charset=UTF-8",
+    //         url: "/reg",
+    //         data: JSON.stringify(data.field),
+    //         dataType: 'json',
+    //         success: function(result) {
+    //             if(result.code == 0) {
+    //                 layer.msg('注册成功！');
+    //             } else {
+    //                 layer.msg(result.msg);
+    //             }
+    //         }
+    //     });
+    // }
 
 </script>
 

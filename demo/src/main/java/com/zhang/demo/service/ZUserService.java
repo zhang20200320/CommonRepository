@@ -61,5 +61,10 @@ public interface ZUserService extends IService<ZUserEntity> {
      */
     boolean checkVerify(String verifyInput, HttpSession session);
 
+    /**
+     * 测试事务的传播特性以及回滚
+     * 方法间调用事务的传播
+     */
+    void testUser1();
 }
 

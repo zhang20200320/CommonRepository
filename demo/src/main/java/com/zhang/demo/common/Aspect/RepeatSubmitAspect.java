@@ -45,12 +45,13 @@ public class RepeatSubmitAspect {
         String path = request.getServletPath();
         LOGGER.info("获取token值, token = [{}], path = [{}]", token, path);
         String key = getKey(token, path);
-        String clientId = getClientId();
+        String clientId_expireDate = getClientId(lockSeconds);
 
-        boolean isSuccess = redisUtils.tryLock(key, clientId, lockSeconds);
-        LOGGER.info("tryLock, isSuccess = [{}] key = [{}], clientId = [{}]", isSuccess, key, clientId);
+        // 添加锁
+        boolean isSuccess = redisUtils.tryLock(key, clientId_expireDate, lockSeconds);
+        LOGGER.info("tryLock, isSuccess = [{}] key = [{}], clientId = [{}]", isSuccess, key, clientId_expireDate);
         if (isSuccess) {
-            LOGGER.info("tryLock success, key = [{}], clientId = [{}]", key, clientId);
+            LOGGER.info("tryLock success, key = [{}], clientId = [{}]", key, clientId_expireDate);
             // 获取锁成功
             Object result;
             try {
@@ -58,11 +59,11 @@ public class RepeatSubmitAspect {
                 result = pjp.proceed();
             } finally {
                 String value = redisUtils.get(key);// 获取key对应的
-                if (clientId.equals(value)) {
-                    LOGGER.info("releaseLock start, key = [{}], value = [{}], clientId = [{}]", key, value, clientId);
+                if (clientId_expireDate.equals(value)) {
+                    LOGGER.info("releaseLock start, key = [{}], value = [{}], clientId = [{}]", key, value, clientId_expireDate);
                     // 解锁
-                    redisUtils.releaseLock(key, clientId);
-                    LOGGER.info("releaseLock success, key = [{}], clientId = [{}]", key, clientId);
+                    redisUtils.releaseLock(key, clientId_expireDate);
+                    LOGGER.info("releaseLock success, key = [{}], clientId = [{}]", key, clientId_expireDate);
                 }
             }
             return result;
@@ -70,9 +71,9 @@ public class RepeatSubmitAspect {
             // 获取锁失败，认为是重复提交的请求
             LOGGER.info("tryLock fail重复请求请稍后再试, key = [{}]", key);
             // (1221, "重复请求，请稍后再试", null);
-//            return CommonResult.repeatSubmitFailed(1221, "已提交，不可重复提交，请稍等..");
+            return CommonResult.repeatSubmitFailed(1221, "已提交，不可重复提交，请稍等..");
 //            return ResultCode.REPEAT_SUBMIT;
-            return R1.error(1221, "重复请求，请稍后再试");
+//            return R1.error(1221, "重复请求，请稍后再试");
         }
 
 
@@ -82,8 +83,18 @@ public class RepeatSubmitAspect {
         return token + path;
     }
 
-    private String getClientId() {
-        return UUID.randomUUID().toString();
+    /**
+     * 给clientId 拼接过期时间，以value保存在缓存中 clientId_expireDate
+     * @param lockSeconds 过期时间（单位：秒）
+     * @return clientId_expireDate 唯一标识_当前时间 + 过期时间 * 1000
+     */
+    private String getClientId(int lockSeconds) {
+        // 给clientId 拼接过期时间，以value保存在缓存中 clientId_expireDate
+        long expires = System.currentTimeMillis() + lockSeconds * 1000;
+        // _1588841042818 ———— 表示当前时间加过期时间
+        String expireTime = "_".concat(String.valueOf(expires));
+        String clientId_expireDate = UUID.randomUUID().toString().concat(expireTime);
+        return clientId_expireDate;
     }
 
 }
