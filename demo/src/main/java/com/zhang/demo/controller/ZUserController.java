@@ -11,6 +11,7 @@ import com.zhang.demo.form.ZCaptchaForm;
 import com.zhang.demo.form.ZUserForm;
 import com.zhang.demo.service.ZUserService;
 import com.zhang.demo.vo.ZUserVo;
+import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ import java.util.List;
  * @author zhang
  * @date 2020-04-20 14:38:30
  */
+@Api(tags = "用户管理", value= "用户管理", description = "用户接口") // 表示类的作用
+//@ApiSort(value = 1)
 @RestController
 @RequestMapping("/user")
 public class ZUserController {
@@ -44,9 +47,15 @@ public class ZUserController {
 
     /**
      * 注册
+     * 应用swagger
+     *      @ApiOperationSort ———— 用于接口方法排序，使用该注解需要在swagger文档页面中文档管理中个性化设置中
+     *                             勾选启动SwaggerBootstrapUi提供的增强功能，并保存。
+     *      @ApiOperation ———— 表示方法说明
      * @param zUserForm
      * @return
      */
+    @ApiOperationSort(3)
+    @ApiOperation(httpMethod = "POST", value = "新增用户" ,  notes="新增注册") // 表示方法说明
     @NoRepeatSubmit(lockTime = 30)
     @PostMapping(value = "/register")
     public CommonResult<ZUserForm> register(@Validated(value = {ZUserForm.ZUserRegister.class}) @RequestBody ZUserForm zUserForm) {
@@ -58,7 +67,9 @@ public class ZUserController {
      * @param zUserForm
      * @return
      */
-    @RequestMapping(value = "/login")
+    @ApiOperationSort(1) // 用于接口方法排序
+    @ApiOperation(httpMethod = "POST", value = "用户登录" ,  notes="登录用户")
+    @PostMapping(value = "/login")
     public CommonResult<ZUserForm> login(@Validated(value = {ZUserForm.ZUserLogin .class}) @RequestBody ZUserForm zUserForm) {
         logger.info("登陆中...");
 
@@ -70,6 +81,8 @@ public class ZUserController {
      * 登出
      * @return
      */
+    @ApiOperationSort(2) // 用于接口方法排序
+    @ApiOperation(httpMethod = "POST", value = "用户登出" ,  notes="用户退出登录")
     @PostMapping(value = "/logout")
     public CommonResult logout() {
         return CommonResult.success(null);
@@ -77,9 +90,30 @@ public class ZUserController {
 
     /**
      * 用户信息
-     * @param userId
+     * swagger2应用
+     * @ApiImplicitParams : 用在方法上包含一组参数说明。
+     * @ApiImplicitParam : 用来注解来给方法入参增加说明。
+     *  参数：
+     *    ·paramType：指定参数放在哪个地方
+     *       ··header：请求参数放置于Request Header，使用@RequestHeader获取
+     *       ··query：请求参数放置于请求地址，使用@RequestParam获取
+     *       ··path：（用于restful接口）-->请求参数的获取：@PathVariable
+     *       ··body：（不常用）
+     *       ··form（不常用）
+     *    ·name：参数名
+     *    ·dataType：参数类型
+     *    ·required：参数是否必须传(true | false)
+     *    ·value：说明参数的意思
+     *    ·defaultValue：参数的默认值
+     *
+     * @param userId 用户标识id
      * @return
      */
+    @ApiOperationSort(4) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "用户信息" ,  notes="获取指定用户详细信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query",name = "userId", value = "用户标识id", required = true, dataType = "String")
+    })
     @GetMapping(value = "/zUserInfo")
     public CommonResult<ZUserVo> zUserInfo(@RequestParam(value = "userId", required = true) String userId) {
         return CommonResult.success(zUserService.queryZUserInfo(userId));
@@ -92,6 +126,13 @@ public class ZUserController {
      * @param pageNum
      * @return
      */
+    @ApiOperationSort(5) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "用户列表" ,  notes="获取分页后的用户列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "keyword", value = "关键字", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "条数", paramType = "query", dataType = "Integer", defaultValue = "5"),
+            @ApiImplicitParam(name = "pageNum", value = "页数", paramType = "query", dataType = "Integer", defaultValue = "1")
+    })
     @GetMapping(value = "/zUserList")
     public CommonResult<List<ZUserEntity>> list(@RequestParam(value = "keyword", required = false) String keyword,
                                                 @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
@@ -107,6 +148,8 @@ public class ZUserController {
      * @return
      * @throws IOException
      */
+    @ApiOperationSort(6) // 用于接口方法排序
+    @ApiOperation(httpMethod = "POST", value = "上传文件" ,  notes="上传文件并存储在项目target-static-upload目录下")
     @PostMapping(value = "/uploadFile")
     public CommonResult<ZUserForm> uploadFile(MultipartFile file, HttpServletRequest req) throws IOException {
         return CommonResult.success("上传成功", zUserService.uploadFile(file, req));
@@ -118,6 +161,8 @@ public class ZUserController {
      * 返回图片验证码byte[]
      * @param ip 调用接口客户端本地ip地址
      */
+    @ApiOperationSort(7) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "获取图片验证码" ,  notes="获取图片验证码，后台创建图片验证码，并redis缓存验证码字符，返回图片验证码byte[]")
     @GetMapping(value = "/getCaptcha/{ip}")
     public CommonResult<byte[]> getCaptcha(@PathVariable String ip, HttpServletRequest req) {
         logger.info("获取中...");
@@ -152,6 +197,8 @@ public class ZUserController {
      * @param request
      * @param response
      */
+    @ApiOperationSort(8) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "生成图片验证码" ,  notes="生成验证码并返回客户端")
     @GetMapping(value = "/getCaptcha111")
     public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
         logger.info("生成中...");
@@ -175,6 +222,8 @@ public class ZUserController {
      * @param zCaptchaForm
      * @return
      */
+    @ApiOperationSort(9) // 用于接口方法排序
+    @ApiOperation(httpMethod = "POST", value = "校验图片验证码" ,  notes="检验图片验证码是否正确")
     @PostMapping("/verify")
     public CommonResult<String> sendCaptcha(@Validated @RequestBody ZCaptchaForm zCaptchaForm) {
         logger.info("开始校验");
@@ -200,6 +249,8 @@ public class ZUserController {
      * 生成二维码
      * @return
      */
+    @ApiOperationSort(10) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "生成二维码" ,  notes="生成二维码并存储指定地址")
     @GetMapping("/createQRCode")
     public String createQRCode(){
         logger.info("生成中...");
@@ -231,6 +282,8 @@ public class ZUserController {
      * 生成二维码并返回客户端
      * @param response
      */
+    @ApiOperationSort(11) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "创建二维码图片" ,  notes="生成二维码并返回客户端")
     @GetMapping(value = "/getQRCode")
     public void getQRCode(HttpServletResponse response) {
         logger.info("获取中...");
@@ -253,6 +306,8 @@ public class ZUserController {
     /**
      * 测试方法间互相调用，事务的传播特性以及回滚
      */
+    @ApiOperationSort(12) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "测试spring事务应用", notes="测试方法间互相调用，事务的传播特性以及回滚")
     @GetMapping("/test")
     public void test(){
         zUserService.testUser1();

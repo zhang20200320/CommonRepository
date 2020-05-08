@@ -6,10 +6,12 @@ import com.zhang.demo.entity.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * 业务接口【测试】 elasticsearch框架
  */
+@ApiIgnore() // 表示不想接口在页面上显示
 @RestController
 @RequestMapping("es")
 public class EmployeeController {
