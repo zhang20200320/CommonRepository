@@ -9,6 +9,8 @@ import com.zhang.demo.common.utils.VerifyUtils;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.form.ZCaptchaForm;
 import com.zhang.demo.form.ZUserForm;
+import com.zhang.demo.job.entity.JdbcBean;
+import com.zhang.demo.job.task.DbTask;
 import com.zhang.demo.service.ZUserService;
 import com.zhang.demo.vo.ZUserVo;
 import io.swagger.annotations.*;
@@ -312,5 +314,40 @@ public class ZUserController {
     public void test(){
         zUserService.testUser1();
     }
+
+    /**
+     * 导入sql文件数据到指定数据库中
+     * @return
+     */
+    @ApiOperationSort(13) // 用于接口方法排序
+    @ApiOperation(httpMethod = "GET", value = "导入数据", notes="导入数据")
+    @GetMapping("/executeDataImport")
+    public CommonResult executeImport(){
+
+        boolean flag = false;
+        String filePath = DbTask.WINDOWS_UPLOAD_PATH.concat("20200508174303_backup.sql");
+        logger.info("sql文件路径filePath: " + filePath);
+        JdbcBean jdbcBean = new JdbcBean();
+        jdbcBean.setIp("localhost");
+        jdbcBean.setPort(3306);
+        jdbcBean.setDb("mall");
+        jdbcBean.setUsername("root");
+        jdbcBean.setPassword("root");
+
+        try{
+            flag = DbTask.executeImportCommond(jdbcBean, filePath);
+        }catch (Exception e){
+            logger.error("数据导入失败");
+            System.out.println(e);
+        }
+        if (flag) {
+            return CommonResult.success("数据导入成功");
+        }else{
+            return CommonResult.failed("数据导入失败");
+        }
+    }
+
+
+
 
 }
