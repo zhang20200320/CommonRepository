@@ -1,6 +1,8 @@
 package com.zhang.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
+import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.form.ZUserForm;
 import com.zhang.demo.vo.ZUserVo;
@@ -26,7 +28,7 @@ public interface ZUserService extends IService<ZUserEntity> {
      * @param zUserForm
      * @return
      */
-    ZUserForm register(ZUserForm zUserForm);
+    ZUserVo register(ZUserForm zUserForm);
 
     /**
      * 根据用户名或昵称分页查询用户
@@ -35,7 +37,8 @@ public interface ZUserService extends IService<ZUserEntity> {
      * @param pageNum
      * @return
      */
-    List<ZUserEntity> list(String keyword, Integer pageSize, Integer pageNum);
+//    List<ZUserEntity> list(String keyword, Integer pageSize, Integer pageNum);
+    PageUtils list(String keyword, Integer pageSize, Integer pageNum);
 
     /**
      * 查询用户详细信息
@@ -66,5 +69,12 @@ public interface ZUserService extends IService<ZUserEntity> {
      * 方法间调用事务的传播
      */
     void testUser1();
+
+    /**
+     * 更新用户信息
+     * @param zUserForm
+     * @return
+     */
+    boolean updateById(ZUserForm zUserForm);
 }
 

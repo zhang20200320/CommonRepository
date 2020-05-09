@@ -54,7 +54,7 @@ public class QRCodeUtil {
         if (imgPath == null || "".equals(imgPath)) {
             return image;
         }
-        // 插入图片
+        // 插入图片(如果要在二维码中内嵌图片，则需要该步插入图片)
         QRCodeUtil.insertImage(image, imgPath, needCompress);
         return image;
     }

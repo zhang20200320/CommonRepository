@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 //@EnableTransactionManagement
-@EnableAspectJAutoProxy(exposeProxy = true)
+@EnableAspectJAutoProxy(exposeProxy = true) // 用于测试方法间调用事务方法失效问题（通过代理调用事务方法）
 @EnableScheduling // 启用定时任务
 public class DemoApplication {
 

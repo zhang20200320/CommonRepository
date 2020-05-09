@@ -73,42 +73,14 @@ public class DbTask {
     }
 
     /**
-     * 导入数据
-     * @param jdbcBean
-     * @param filePath
-     * @return
-     * @throws Exception
-     */
-    //执行导入命令
-    public static boolean executeImportCommond(JdbcBean jdbcBean,String filePath) throws Exception {
-        //动态获取本地MySQL数据库安装目录bin下的目录
-        String C=getMysqlPath();
-
-        //静态获取本地MySQL数据库安装目录下bin的目录
-//		String C="C:\\Program Files\\MySQL\\MySQL Server 5.6\\bin\\";
-
-        String sql_1 ="mysql -P "+jdbcBean.getPort()+" -h "+jdbcBean.getIp()+
-                " -u "+jdbcBean.getUsername()+" -p"+jdbcBean.getPassword()+
-                " --default-character-set=utf8";
-        String sql_2 = "use "+jdbcBean.getDb();
-        String sql_3 = "source "+filePath;
-        Process process = Runtime.getRuntime().exec(sql_1);
-        OutputStream os = process.getOutputStream();
-        OutputStreamWriter writer = new OutputStreamWriter(os);
-        writer.write(sql_2 + "\r\n" + sql_3);
-        writer.flush();
-        writer.close();
-        os.close();
-        if(process.waitFor()==0){
-            return true;
-        }
-        return false;
-    }
-
-    /**
-        * 导出数据(方法一)
-        * dos命令执行备份 mysqldump -P port -h ip -u username -ppassWord projectName > d:\db.sql
-        * C:\Program Files\MySQL\MySQL Server 5.6\bin\mysqldump -P 3306 -h 127.0.0.1 -u root -proot demo --default-character-set=utf8 --lock-tables=false --result-file=D:/data/design_center/dbfiles/20180817185421_backup.sql
+        * 导出数据
+        * dos命令执行备份 mysqldump -P port -h ip -u username -ppassword dbName > d:\db.sql
+        *       （注意命令中-ppassWord ———— -p和密码之间不能有空格（导出命令中未输入密码的跳过该错），
+        *                            否则会提示输入密码，输入之后回车会报错【报错信息：
+        *                            mysqldump: Got error: 1049: Unknown database 'root' when selecting the database】）
+        * DOS命令如下：
+        * D:\softwares\mysql\mysql-8.0.18-winx64\bin>
+        *                       mysqldump -P 3306 -h 127.0.0.1 -u root -proot demo > d:\data\peng\dbfiles\demo_db.sql
         * @param jdbcBean
         * @param filePath
         * @return
@@ -134,6 +106,43 @@ public class DbTask {
             return true;
         }
         return false;//异常终止
+    }
+
+    /**
+     * 导入指定sql文件数据到指定数据库
+     *      sql_1 ———— 表示登录mysql数据库中。命令：mysql -P 3306 -h localhost -u root -proot --default-character-set=utf8
+     *      sql_2 ———— 表示使用mysql数据库中的哪一个数据库。命令：use test
+     *      sql_3 ———— 表示执行导入该路径下的sql文件。命令：source d:\data\peng\dbfiles\demo_db1.sql
+     *
+     * @date 2020-05-09 09:56:56
+     * @param jdbcBean
+     * @return
+     * @throws Exception
+     */
+    //执行导入命令
+    public static boolean executeImportCommond(JdbcBean jdbcBean) throws Exception {
+        //动态获取本地MySQL数据库安装目录bin下的目录
+        String C=getMysqlPath();
+
+        //静态获取本地MySQL数据库安装目录下bin的目录
+//		String C="C:\\Program Files\\MySQL\\MySQL Server 5.6\\bin\\";
+
+        String sql_1 ="mysql -P "+jdbcBean.getPort()+" -h "+jdbcBean.getIp()+
+                " -u "+jdbcBean.getUsername()+" -p"+jdbcBean.getPassword()+
+                " --default-character-set=utf8";
+        String sql_2 = "use "+jdbcBean.getDb();
+        String sql_3 = "source "+jdbcBean.getFilePath();
+        Process process = Runtime.getRuntime().exec(sql_1);
+        OutputStream os = process.getOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(os);
+        writer.write(sql_2 + "\r\n" + sql_3);
+        writer.flush();
+        writer.close();
+        os.close();
+        if(process.waitFor()==0){
+            return true;
+        }
+        return false;
     }
 
     /**

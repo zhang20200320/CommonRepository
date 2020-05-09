@@ -1,5 +1,6 @@
 package com.zhang.demo.form;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -7,8 +8,14 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
+
+@ApiModel(value="用户登录/注册信息")
 @Data
 public class ZUserForm {
+
+    @ApiModelProperty(value = "用户id")
+    @NotEmpty(groups = {ZUserUpdate.class}, message = "用户id不能为空")
+    private String id;
 
     @ApiModelProperty(value = "用户名称")
     @NotEmpty(groups = {ZUserRegister.class,
@@ -28,5 +35,6 @@ public class ZUserForm {
 
     public interface ZUserRegister{}
     public interface ZUserLogin{}
+    public interface ZUserUpdate{}
 
 }

@@ -1,8 +1,10 @@
 package com.zhang.demo.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.zhang.demo.common.Annotation.NoRepeatSubmit;
 import com.zhang.demo.common.CommonResult;
 import com.zhang.demo.common.utils.Constant;
+import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.common.utils.QRCode.QRCodeUtil;
 import com.zhang.demo.common.utils.RedisUtils;
 import com.zhang.demo.common.utils.VerifyUtils;
@@ -48,23 +50,6 @@ public class ZUserController {
     private RedisUtils redisUtils;
 
     /**
-     * 注册
-     * 应用swagger
-     *      @ApiOperationSort ———— 用于接口方法排序，使用该注解需要在swagger文档页面中文档管理中个性化设置中
-     *                             勾选启动SwaggerBootstrapUi提供的增强功能，并保存。
-     *      @ApiOperation ———— 表示方法说明
-     * @param zUserForm
-     * @return
-     */
-    @ApiOperationSort(3)
-    @ApiOperation(httpMethod = "POST", value = "新增用户" ,  notes="新增注册") // 表示方法说明
-    @NoRepeatSubmit(lockTime = 30)
-    @PostMapping(value = "/register")
-    public CommonResult<ZUserForm> register(@Validated(value = {ZUserForm.ZUserRegister.class}) @RequestBody ZUserForm zUserForm) {
-        return CommonResult.success(zUserService.register(zUserForm));
-    }
-
-    /**
      * 登录
      * @param zUserForm
      * @return
@@ -88,6 +73,33 @@ public class ZUserController {
     @PostMapping(value = "/logout")
     public CommonResult logout() {
         return CommonResult.success(null);
+    }
+
+    /**
+     * 注册
+     * 应用swagger
+     *      @ApiOperationSort ———— 用于接口方法排序，使用该注解需要在swagger文档页面中文档管理中个性化设置中
+     *                             勾选启动SwaggerBootstrapUi提供的增强功能，并保存。
+     *      @ApiOperation ———— 表示方法说明
+     * @param zUserForm
+     * @return
+     */
+    @ApiOperationSort(3)
+    @ApiOperation(httpMethod = "POST", value = "新增用户" ,  notes="新增注册") // 表示方法说明
+    @NoRepeatSubmit(lockTime = 30)
+    @PostMapping(value = "/register")
+    public CommonResult<ZUserVo> register(@Validated(value = {ZUserForm.ZUserRegister.class}) @RequestBody ZUserForm zUserForm) {
+        return CommonResult.success(zUserService.register(zUserForm));
+    }
+
+    @ApiOperation("修改指定用户信息")
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    public CommonResult update(@Validated(value = {ZUserForm.ZUserUpdate.class}) @RequestBody ZUserForm zUserForm) {
+        boolean count = zUserService.updateById(zUserForm);
+        if (count) {
+            return CommonResult.success("更新用户成功");
+        }
+        return CommonResult.failed("更新用户失败");
     }
 
     /**
@@ -136,11 +148,12 @@ public class ZUserController {
             @ApiImplicitParam(name = "pageNum", value = "页数", paramType = "query", dataType = "Integer", defaultValue = "1")
     })
     @GetMapping(value = "/zUserList")
-    public CommonResult<List<ZUserEntity>> list(@RequestParam(value = "keyword", required = false) String keyword,
+    public CommonResult<PageUtils> list(@RequestParam(value = "keyword", required = false) String keyword,
                                                 @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                 @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<ZUserEntity> zUserList = zUserService.list(keyword, pageSize, pageNum);
-        return CommonResult.success(zUserList);
+//        List<ZUserEntity> zUserList = zUserService.list(keyword, pageSize, pageNum);
+        PageUtils zUserPageList = zUserService.list(keyword, pageSize, pageNum);
+        return CommonResult.success(zUserPageList);
     }
 
     /**
@@ -320,22 +333,16 @@ public class ZUserController {
      * @return
      */
     @ApiOperationSort(13) // 用于接口方法排序
-    @ApiOperation(httpMethod = "GET", value = "导入数据", notes="导入数据")
-    @GetMapping("/executeDataImport")
-    public CommonResult executeImport(){
-
+    @ApiOperation(value = "导入数据", notes="导入sql文件数据到指定数据库中")
+    @PostMapping("/executeDataImport")
+    public CommonResult executeImport(@RequestBody JdbcBean jdbcBean){
         boolean flag = false;
-        String filePath = DbTask.WINDOWS_UPLOAD_PATH.concat("20200508174303_backup.sql");
-        logger.info("sql文件路径filePath: " + filePath);
-        JdbcBean jdbcBean = new JdbcBean();
-        jdbcBean.setIp("localhost");
-        jdbcBean.setPort(3306);
-        jdbcBean.setDb("mall");
-        jdbcBean.setUsername("root");
-        jdbcBean.setPassword("root");
+
+//        String filePath = DbTask.WINDOWS_UPLOAD_PATH.concat("demo_db1.sql");
+        logger.info("sql文件路径filePath: " + jdbcBean.getFilePath());
 
         try{
-            flag = DbTask.executeImportCommond(jdbcBean, filePath);
+            flag = DbTask.executeImportCommond(jdbcBean);
         }catch (Exception e){
             logger.error("数据导入失败");
             System.out.println(e);

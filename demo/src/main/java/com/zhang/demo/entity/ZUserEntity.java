@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
 /**
  *
@@ -63,13 +64,19 @@ public class ZUserEntity implements Serializable {
 	}
 
 	/**
-	 * 用户注册
+	 * 用户注册/更新
 	 * @param zUserForm
 	 */
 	public ZUserEntity(ZUserForm zUserForm) {
 		BeanUtils.copyProperties(zUserForm, this);
-		this.id = UUID.randomUUID().toString();
-		this.createTime = new Date();
-		this.isDelete = 0;
+		if (StringUtils.isEmpty(zUserForm.getId())) {
+			this.id = UUID.randomUUID().toString();
+			this.createTime = new Date();
+			this.isDelete = 0;
+		} else {
+			this.updateTime = new Date();
+		}
 	}
+
+
 }

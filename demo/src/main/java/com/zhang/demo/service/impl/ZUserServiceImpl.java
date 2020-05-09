@@ -1,7 +1,10 @@
 package com.zhang.demo.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.zhang.demo.common.CommonResult;
 import com.zhang.demo.common.utils.Constant;
+import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.common.utils.RandomValidateCodeUtil;
 import com.zhang.demo.common.utils.VerifyUtils;
 import com.zhang.demo.form.ZUserForm;
@@ -41,7 +44,7 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
     private ZUserService zUserService;
 
     @Override
-    public ZUserForm register(ZUserForm zUserForm) {
+    public ZUserVo register(ZUserForm zUserForm) {
         logger.info("开始注册");
         try {
             // 模拟业务场景
@@ -62,13 +65,27 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
             CommonResult.failed();
         }
         logger.info("注册成功");
-        return zUserForm;
+        ZUserVo zUserVo = new ZUserVo();
+        BeanUtils.copyProperties(zUserForm, zUserVo);
+        return zUserVo;
     }
 
     @Override
-    public List<ZUserEntity> list(String keyword, Integer pageSize, Integer pageNum) {
+    public boolean updateById(ZUserForm zUserForm) {
+        ZUserEntity zUserEntity = new ZUserEntity(zUserForm);
+        BeanUtils.copyProperties(zUserForm, zUserEntity);
+        zUserEntity.setUpdateBy("zhang");
+        return zUserService.updateById(zUserEntity);
+    }
+
+    @Override
+    public PageUtils list(String keyword, Integer pageSize, Integer pageNum) {
+        // 列表分页
+        PageHelper.startPage(pageNum, pageSize);
         List<ZUserEntity> list = zUserService.list();
-        return list;
+        // 使用PageUtils结果进行包装
+        PageUtils page = new PageUtils(list);
+        return page;
     }
 
     @Override
