@@ -33,7 +33,8 @@ public class DbTask {
      * 数据库备份 导出.sql文件到本地
      * @return
      */
-    @Scheduled(cron="59 59 23 * * ? ")//表示每天晚上23点59分59秒执行一次
+//    @Scheduled(cron="59 59 23 * * ? ")//表示每天晚上23点59分59秒执行一次
+    @Scheduled(cron="0 08/4 16 * * ? ")//测试
     public CommonResult backup(){
         try {
             String fileName = new SimpleDateFormat(SQL_BACKUP_PREFIX_FORMAT).format(new Date())+"_backup";
