@@ -1,19 +1,29 @@
 package com.zhang.demo.service.impl;
 
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.google.common.base.Stopwatch;
 import com.zhang.demo.common.CommonResult;
 import com.zhang.demo.common.utils.Constant;
 import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.common.utils.RandomValidateCodeUtil;
 import com.zhang.demo.common.utils.VerifyUtils;
+import com.zhang.demo.common.utils.security.JwtTokenUtil;
+import com.zhang.demo.entity.ZUserLoginLogEntity;
 import com.zhang.demo.form.ZUserForm;
+import com.zhang.demo.service.ZUserLoginLogService;
 import com.zhang.demo.vo.ZUserVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhang.demo.dao.ZUserDao;
@@ -23,8 +33,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -33,42 +43,110 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 @Service("zUserService")
 public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> implements ZUserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ZUserServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZUserServiceImpl.class);
 
     @Autowired
     private ZUserService zUserService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+//    @Autowired
+    @Resource
+    private ZUserDao zUserDao;
+    @Autowired
+    private ZUserLoginLogService zUserLoginLogService;
+
+
 
     @Override
     public ZUserVo register(ZUserForm zUserForm) {
-        logger.info("开始注册");
+        LOGGER.info("开始注册");
         try {
             // 模拟业务场景
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            logger.info("错误");
+            LOGGER.info("错误");
         }
         // 复制属性值
         ZUserEntity zUserEntity = new ZUserEntity(zUserForm);
-        //密码加密
-//        String encodePassword = passwordEncoder.encode(zUserForm.getPassword());
-//        zUserForm.setPassword(encodePassword);
+        //密码加密 // 此处用于security加密密码
+        String encodePassword = passwordEncoder.encode(zUserForm.getPassword());
+        zUserEntity.setPassword(encodePassword);
         zUserEntity.setCreateBy("zhang");
         boolean flog = zUserService.save(zUserEntity);
         if (!flog) {
-            logger.info("注册失败");
+            LOGGER.info("注册失败");
             CommonResult.failed();
         }
-        logger.info("注册成功");
+        LOGGER.info("注册成功");
         ZUserVo zUserVo = new ZUserVo();
         BeanUtils.copyProperties(zUserForm, zUserVo);
         return zUserVo;
     }
+
+    @Override
+    public String login(ZUserForm zUserForm) {
+        LOGGER.info("登陆中...");
+        String token = "";
+
+        try {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(zUserForm.getUsername());
+            if (!passwordEncoder.matches(zUserForm.getPassword(), userDetails.getPassword())) {
+                throw new BadCredentialsException("密码不正确");
+            }
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            token = jwtTokenUtil.generateToken(userDetails);
+//            updateLoginTimeByUsername(username);
+            // 添加登录记录
+            insertLoginLog(zUserForm.getUsername());
+            LOGGER.info("登录成功");
+        } catch (AuthenticationException e) {
+            LOGGER.warn("登录异常:{}", e.getMessage());
+            return "登录异常";
+        }
+
+        return token;
+    }
+
+    @Override
+    public ZUserEntity getZUserByUsername(String username) {
+        return zUserDao.getZUserByUsername(username);
+    }
+
+    /**
+     * 添加登录记录 ZUserLoginLog
+     *
+     * @param username 用户名
+     */
+    private void insertLoginLog(String username) {
+        ZUserEntity admin = zUserService.getZUserByUsername(username);
+        if (admin == null) return;
+        ZUserLoginLogEntity loginLog = new ZUserLoginLogEntity(admin);
+        zUserLoginLogService.save(loginLog);
+    }
+//
+//    @Override
+//    public UserDetails loadUserByUsername(String username) {
+//        //获取用户信息
+//        ZUserEntity admin = this.getZUserByUsername(username);
+//        if (admin != null) {
+////            List<UmsResource> resourceList = getResourceList(admin.getId()); // 角色
+////            return new AdminUserDetails(admin, resourceList);
+//            return new AdminUserDetails(admin);
+//        }
+//        throw new UsernameNotFoundException("用户名或密码错误");
+//    }
 
     @Override
     public boolean updateById(ZUserForm zUserForm) {
@@ -98,7 +176,9 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
 
     @Override
     public String uploadFile(MultipartFile file, HttpServletRequest req) throws IOException {
-        logger.info("开始上传...");
+        // 创建之后立刻计时，耗时检查
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        LOGGER.info("开始上传...");
 
         // 存储路径(resources-static-upload)
 //        String fileDirPath = new String(Constant.ROOT_DIRECTORY + Constant.IMAGES_URL); // 项目中存储文件
@@ -131,7 +211,9 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
 
 //        newFile.delete(); // 删除临时创建的文件
 
-        logger.info("上传成功");
+        LOGGER.info("上传成功");
+        // 当前已经消耗的时间
+        System.out.println("上传文件耗时 : " + stopwatch.elapsed(TimeUnit.SECONDS));
         return url;
     }
 
@@ -145,7 +227,7 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
             RandomValidateCodeUtil randomValidateCode = new RandomValidateCodeUtil();
             randomValidateCode.getRandcode(request, response);//输出验证码图片方法
         } catch (Exception e) {
-            logger.error("获取验证码失败");
+            LOGGER.error("获取验证码失败");
             e.printStackTrace();
         }
     }
@@ -164,7 +246,7 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
                 return false;
             }
         } catch (Exception e) {
-            logger.error("验证码校验失败");
+            LOGGER.error("验证码校验失败");
             e.printStackTrace();
             return false;
         }

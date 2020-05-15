@@ -12,4 +12,6 @@ public class ZUserVo {
 
     private String phoneNumber;
 
+    private String Authorization;
+
 }

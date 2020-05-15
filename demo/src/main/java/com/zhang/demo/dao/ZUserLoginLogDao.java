@@ -1,7 +1,7 @@
 package com.zhang.demo.dao;
 
-import com.zhang.demo.entity.ZUserEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.zhang.demo.entity.ZUserLoginLogEntity;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -11,8 +11,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @date 2020-04-20 14:38:30
  */
 @Mapper
-public interface ZUserDao extends BaseMapper<ZUserEntity> {
-
-    ZUserEntity getZUserByUsername(String username);
+public interface ZUserLoginLogDao extends BaseMapper<ZUserLoginLogEntity> {
 
 }

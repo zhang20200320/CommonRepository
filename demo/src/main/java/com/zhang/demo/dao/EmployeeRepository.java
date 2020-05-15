@@ -4,6 +4,7 @@ import com.zhang.demo.entity.Employee;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("ALL")
 @Component
 public interface EmployeeRepository extends ElasticsearchRepository<Employee,String> {
 
@@ -13,4 +14,5 @@ public interface EmployeeRepository extends ElasticsearchRepository<Employee,Str
      * @return
      */
     Employee queryEmployeeById(String id);
+
 }

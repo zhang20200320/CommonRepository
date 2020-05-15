@@ -1,6 +1,6 @@
 package com.zhang.demo.controller;
 
-import com.github.pagehelper.PageInfo;
+import com.google.common.base.Stopwatch;
 import com.zhang.demo.common.Annotation.NoRepeatSubmit;
 import com.zhang.demo.common.CommonResult;
 import com.zhang.demo.common.utils.Constant;
@@ -8,7 +8,6 @@ import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.common.utils.QRCode.QRCodeUtil;
 import com.zhang.demo.common.utils.RedisUtils;
 import com.zhang.demo.common.utils.VerifyUtils;
-import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.form.ZCaptchaForm;
 import com.zhang.demo.form.ZUserForm;
 import com.zhang.demo.job.entity.JdbcBean;
@@ -19,6 +18,7 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户
@@ -36,7 +39,7 @@ import java.util.List;
  * @date 2020-04-20 14:38:30
  */
 @Api(tags = "用户管理", value= "用户管理", description = "用户接口") // 表示类的作用
-//@ApiSort(value = 1)
+//@ApiIgnore() // 表示不想接口在页面上显示
 @RestController
 @RequestMapping("/user")
 public class ZUserController {
@@ -48,32 +51,10 @@ public class ZUserController {
 
     @Autowired
     private RedisUtils redisUtils;
-
-    /**
-     * 登录
-     * @param zUserForm
-     * @return
-     */
-    @ApiOperationSort(1) // 用于接口方法排序
-    @ApiOperation(httpMethod = "POST", value = "用户登录" ,  notes="登录用户")
-    @PostMapping(value = "/login")
-    public CommonResult<ZUserForm> login(@Validated(value = {ZUserForm.ZUserLogin .class}) @RequestBody ZUserForm zUserForm) {
-        logger.info("登陆中...");
-
-        logger.info("登录成功");
-        return CommonResult.success(zUserForm);
-    }
-
-    /**
-     * 登出
-     * @return
-     */
-    @ApiOperationSort(2) // 用于接口方法排序
-    @ApiOperation(httpMethod = "POST", value = "用户登出" ,  notes="用户退出登录")
-    @PostMapping(value = "/logout")
-    public CommonResult logout() {
-        return CommonResult.success(null);
-    }
+    @Value("${jwt.tokenHeader}")
+    private String tokenHeader;
+    @Value("${jwt.tokenHead}")
+    private String tokenHead;
 
     /**
      * 注册
@@ -84,7 +65,7 @@ public class ZUserController {
      * @param zUserForm
      * @return
      */
-    @ApiOperationSort(3)
+    @ApiOperationSort(value = 1) // 用于接口方法排序
     @ApiOperation(httpMethod = "POST", value = "新增用户" ,  notes="新增注册") // 表示方法说明
     @NoRepeatSubmit(lockTime = 30)
     @PostMapping(value = "/register")
@@ -92,8 +73,43 @@ public class ZUserController {
         return CommonResult.success(zUserService.register(zUserForm));
     }
 
+    /**
+     * 登录
+     * @param zUserForm
+     * @return
+     */
+    @ApiOperationSort(2) // 用于接口方法排序
+    @ApiOperation(httpMethod = "POST", value = "用户登录" ,  notes="登录用户")
+    @PostMapping(value = "/login")
+    public CommonResult<Map<String, String>> login(@Validated(value = {ZUserForm.ZUserLogin .class}) @RequestBody ZUserForm zUserForm) {
+        // 创建之后立刻计时，若想主动开始计时
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        String token = zUserService.login(zUserForm);
+        if (token == null) {
+            return CommonResult.validateFailed("用户名或密码错误");
+        }
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("token", token);
+        tokenMap.put("tokenHead", tokenHead);
+        // 当前已经消耗的时间
+        System.out.println("登录耗时 : " + stopwatch.elapsed(TimeUnit.SECONDS));;
+        return CommonResult.success(tokenMap);
+    }
+
+    /**
+     * 登出
+     * @return
+     */
+    @ApiOperationSort(3) // 用于接口方法排序
+    @ApiOperation(httpMethod = "POST", value = "用户登出" ,  notes="用户退出登录")
+    @PostMapping(value = "/logout")
+    public CommonResult logout() {
+        return CommonResult.success(null);
+    }
+
     @ApiOperation("修改指定用户信息")
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     public CommonResult update(@Validated(value = {ZUserForm.ZUserUpdate.class}) @RequestBody ZUserForm zUserForm) {
         boolean count = zUserService.updateById(zUserForm);
         if (count) {
@@ -180,6 +196,8 @@ public class ZUserController {
     @ApiOperation(httpMethod = "GET", value = "获取图片验证码" ,  notes="获取图片验证码，后台创建图片验证码，并redis缓存验证码字符，返回图片验证码byte[]")
     @GetMapping(value = "/getCaptcha/{ip}")
     public CommonResult<byte[]> getCaptcha(@PathVariable String ip, HttpServletRequest req) {
+        // 创建之后立刻计时，耗时检查
+        Stopwatch stopwatch = Stopwatch.createStarted();
         logger.info("获取中...");
 
         Object[] imageCaptchaInfo = VerifyUtils.createImage();
@@ -203,6 +221,8 @@ public class ZUserController {
         System.out.println("imageByte[]: " + Arrays.toString(imageByte));
 
         logger.info("获取成功");
+        // 当前已经消耗的时间
+        System.out.println("登录耗时 : " + stopwatch.elapsed(TimeUnit.SECONDS));
         return CommonResult.success("获取图片验证码地址：" + url);
     }
 

@@ -7,10 +7,10 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Data
-@Document(indexName = "company",type = "employee", shards = 1,replicas = 0, refreshInterval = "-1")
+@Document(indexName = "zhang_test",type = "employee", shards = 1,replicas = 0, refreshInterval = "-1")
 public class Employee {
     @Id
-    private String id;
+    private int id;
     @Field(type = FieldType.Text)
     private String firstName;
     @Field(type = FieldType.Text)

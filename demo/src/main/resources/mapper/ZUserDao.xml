@@ -15,5 +15,9 @@
         <result property="isDelete" column="is_delete"/>
     </resultMap>
 
+    <select id="getZUserByUsername" resultType="com.zhang.demo.entity.ZUserEntity">
+        select * from z_user where username = #{username}
+    </select>
+
 
 </mapper>

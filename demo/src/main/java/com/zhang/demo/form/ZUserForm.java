@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @Data
 public class ZUserForm {
 
-    @ApiModelProperty(value = "用户id")
+    @ApiModelProperty(hidden = true, value = "用户id")
     @NotEmpty(groups = {ZUserUpdate.class}, message = "用户id不能为空")
     private String id;
 

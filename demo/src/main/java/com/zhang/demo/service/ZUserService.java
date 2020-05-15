@@ -1,7 +1,6 @@
 package com.zhang.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.github.pagehelper.PageInfo;
 import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.form.ZUserForm;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
 
 
 /**
@@ -29,6 +27,22 @@ public interface ZUserService extends IService<ZUserEntity> {
      * @return
      */
     ZUserVo register(ZUserForm zUserForm);
+
+    /**
+     * 用户登录
+     * @param zUserForm
+     * @return
+     */
+    String login(ZUserForm zUserForm);
+
+    ZUserEntity getZUserByUsername(String username);
+//
+//    /**
+//     * 获取用户信息(仅用于登录验证)
+//     * @param username
+//     * @return
+//     */
+//    UserDetails loadUserByUsername(String username);
 
     /**
      * 根据用户名或昵称分页查询用户
