@@ -1,0 +1,118 @@
+server:
+  port: 1221
+
+# mysql
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    #MySQL配置
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  resources:
+    static-locations: classpath:/static/,classpath:/views/
+
+  #邮件配置
+  mail:
+    host: smtp.163.com
+    username: zhangpeng12_java@163.com
+    password: "OREWTKYKRZYLKWUQ"
+    properties:
+      ssl:
+       enable: true
+      to: 18292000084@163.com
+
+
+
+  #redis
+  redis:
+    open: true
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    timeout: 6000ms
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+  #elasticsearch
+  data:
+    elasticsearch:
+      # elasticsearch集群名称，默认的是elasticsearch
+      cluster-name: zhangElasticsearch
+      #节点的地址 注意api模式下端口号是9300，千万不要写成9200
+      cluster-nodes: 127.0.0.1:9300
+      #是否开启本地存储
+      repositories:
+        enable: true
+
+
+jwt:
+  tokenHeader: Authorization #JWT存储的请求头
+  secret: zhangpeng #JWT加解密使用的密钥
+  expiration: 604800 #JWT的超期限时间(60*60*24*7)
+  tokenHead: Bearer  #JWT负载中拿到开头
+
+secure:
+  ignored:
+    urls: #安全路径白名单
+      - /des/** # test
+      - /es/** # test elasticsearch
+      - /swagger-ui.html
+      - /doc.html
+      - /swagger-resources/**
+      - /swagger/**
+      - /**/v2/api-docs
+      - /**/*.js
+      - /**/*.css
+      - /**/*.png
+      - /**/*.ico
+      - /webjars/springfox-swagger-ui/**
+      - /actuator/**
+      - /druid/**
+      - /user/login
+      - /user/register
+      - /user/info
+      - /user/logout
+
+#mybatis:
+#  typeAliasesPackage: com.zhang.demo.entity
+#  configuration:
+#    map-underscore-to-camel-case: true
+#  mapper-locations: classpath:mapper/*.xml
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.zhang.demo.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  #是否控制台 print mybatis-plus 的 LOGO
+  global-config:
+    banner: false
+
+
+pagehelper:
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+
+#日志输出配置（开发环境）
+logging:
+  file:
+    path: D:/myLogFiles
+    max-size: 100MB
+    max-history: 30
+
+
+#jasypt加密的密匙
+jasypt:
+  encryptor:
+    password: zp

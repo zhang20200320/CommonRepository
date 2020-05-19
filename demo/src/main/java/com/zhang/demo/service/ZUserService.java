@@ -1,6 +1,7 @@
 package com.zhang.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zhang.demo.common.CommonResult;
 import com.zhang.demo.common.utils.PageUtils;
 import com.zhang.demo.entity.ZUserEntity;
 import com.zhang.demo.form.ZUserForm;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -33,7 +35,7 @@ public interface ZUserService extends IService<ZUserEntity> {
      * @param zUserForm
      * @return
      */
-    String login(ZUserForm zUserForm);
+    CommonResult<Map<String, String>> login(ZUserForm zUserForm);
 
     ZUserEntity getZUserByUsername(String username);
 //

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -40,9 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
@@ -64,6 +63,10 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
     private ZUserDao zUserDao;
     @Autowired
     private ZUserLoginLogService zUserLoginLogService;
+    @Value("${jwt.tokenHeader}")
+    private String tokenHeader;
+    @Value("${jwt.tokenHead}")
+    private String tokenHead;
 
 
 
@@ -95,10 +98,11 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
     }
 
     @Override
-    public String login(ZUserForm zUserForm) {
+    public CommonResult<Map<String, String>> login(ZUserForm zUserForm) {
         LOGGER.info("登陆中...");
         String token = "";
-
+        Map<String, String> resultMap = new HashMap<String, String>();
+        resultMap.put("tokenHead", tokenHead);
         try {
             UserDetails userDetails = userDetailsService.loadUserByUsername(zUserForm.getUsername());
             if (!passwordEncoder.matches(zUserForm.getPassword(), userDetails.getPassword())) {
@@ -112,11 +116,11 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserDao, ZUserEntity> impleme
             insertLoginLog(zUserForm.getUsername());
             LOGGER.info("登录成功");
         } catch (AuthenticationException e) {
-            LOGGER.warn("登录异常:{}", e.getMessage());
-            return "登录异常";
+            LOGGER.error("登录异常, error-message = [{}]", e.getMessage());
+            return CommonResult.failed(e.getMessage());
         }
-
-        return token;
+        resultMap.put("token",token);
+        return CommonResult.success(resultMap);
     }
 
     @Override

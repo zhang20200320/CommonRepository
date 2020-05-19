@@ -38,7 +38,7 @@ public class CommonResult<T> {
      * @param message 提示信息
      */
     public static <T> CommonResult<T> success(String message) {
-        return new CommonResult<T>(ResultCode.SUCCESS.getCode(), message, null);
+        return new CommonResult<T>(ResultCode.SUCCESS.getCode(), message, (T) new ArrayList<T>());
     }
 
     /**
@@ -68,7 +68,7 @@ public class CommonResult<T> {
      * @param errorCode 错误码
      */
     public static <T> CommonResult<T> failed(IErrorCode errorCode) {
-        return new CommonResult<T>(errorCode.getCode(), errorCode.getMessage(), null);
+        return new CommonResult<T>(errorCode.getCode(), errorCode.getMessage(), (T) new ArrayList<T>());
     }
 
     /**
@@ -87,7 +87,7 @@ public class CommonResult<T> {
      * @param message 提示信息
      */
     public static <T> CommonResult<T> failed(String message) {
-        return new CommonResult<T>(ResultCode.FAILED.getCode(), message, null);
+        return new CommonResult<T>(ResultCode.FAILED.getCode(), message, (T) new ArrayList<T>());
     }
 
     /**
@@ -110,7 +110,7 @@ public class CommonResult<T> {
      * @param message 提示信息
      */
     public static <T> CommonResult<T> validateFailed(String message) {
-        return new CommonResult<T>(ResultCode.VALIDATE_FAILED.getCode(), message, null);
+        return new CommonResult<T>(ResultCode.VALIDATE_FAILED.getCode(), message, (T) new ArrayList<T>());
     }
 
     /**
@@ -131,7 +131,7 @@ public class CommonResult<T> {
      * 未登录返回结果
      */
     public static <T> CommonResult<T> repeatSubmitFailed(long code, String message) {
-        return new CommonResult<T>(code, message, null);
+        return new CommonResult<T>(code, message, (T) new ArrayList<T>());
     }
 
     public long getCode() {

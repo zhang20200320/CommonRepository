@@ -1,0 +1,65 @@
+<included>
+
+    <!-- 获取application.yml中邮件配置信息 -->
+    <!--SMTP server的地址-->
+    <springProperty scope="context" name="MAIL_HOST" source="spring.mail.host"/>
+    <!-- 发送邮件账号 -->
+    <springProperty scope="context" name="MAIL_USERNAME" source="spring.mail.username"/>
+    <!--发送邮件密码-->
+    <springProperty scope="context" name="MAIL_PASSWORD" source="spring.mail.password"/>
+    <!--指定发送到那个邮箱，可设置多个<to>属性，指定多个目的邮箱-->
+    <springProperty scope="context" name="MAIL_ERROR_TO" source="spring.mail.properties.to"/>
+    <!--指定发送到那个邮箱，可设置多个<to>属性，指定多个目的邮箱-->
+    <springProperty scope="context" name="MAIL_SSL" source="spring.mail.properties.ssl.enable"/>
+
+<!--
+
+    &lt;!&ndash;邮件设置&ndash;&gt;
+    &lt;!&ndash; SMTP server的地址，必需指定。如网易的SMTP服务器地址是： smtp.163.com &ndash;&gt;
+    <property name="MAIL_HOST" value="smtp.163.com"/>&lt;!&ndash;填入要发送邮件的smtp服务器地址&ndash;&gt;
+    &lt;!&ndash; SMTP server的端口地址。默认值：25 &ndash;&gt;
+    &lt;!&ndash;<property name="smtpPort" value="25"/>&ndash;&gt;
+    &lt;!&ndash; 发送邮件账号，默认为null &ndash;&gt;
+    <property name="MAIL_USERNAME" value="zhangpeng12_java@163.com"/>&lt;!&ndash;发件人账号&ndash;&gt;
+    &lt;!&ndash; 发送邮件密码，默认为null &ndash;&gt;
+    <property name="MAIL_PASSWORD" value="OREWTKYKRZYLKWUQ"/>&lt;!&ndash;发件人密码&ndash;&gt;
+    &lt;!&ndash; 如果设置为true，appender将会使用SSL连接到日志服务器。默认值：false &ndash;&gt;
+    <property name="SSL" value="true"/>
+    &lt;!&ndash; 指定发送到那个邮箱，可设置多个<to>属性，指定多个目的邮箱 &ndash;&gt;
+    <property name="MAIL_ERROR_TO" value="18292000084@163.com"/>&lt;!&ndash;收件人账号多个可以逗号隔开&ndash;&gt;
+    &lt;!&ndash; 指定发件人名称。如果设置成“&lt;ADMIN&gt; ”，则邮件发件人将会是“<ADMIN> ” &ndash;&gt;
+    &lt;!&ndash;<property name="EMAIL_FROM" value="&lt;ZHANG&gt;" />&ndash;&gt;
+    &lt;!&ndash; 指定emial的标题，它需要满足PatternLayout中的格式要求。如果设置成“Log: %logger - %msg ”，就案例来讲，则发送邮件时，标题为“【Error】: com.foo.Bar - Hello World ”。 默认值："%logger{20} - %m". &ndash;&gt;
+    <property name="EMAIL_SUBJECT" value="【Error】: %logger - %msg" />
+-->
+    <property name="EMAIL_SUBJECT" value="【Error】: %logger - %msg" />
+    <!-- ERROR邮件发送 -->
+    <appender name="EMAIL_ERROR" class="ch.qos.logback.classic.net.SMTPAppender">
+        <smtpHost>${MAIL_HOST}</smtpHost>
+        <!--<smtpPort>${smtpPort}</smtpPort>-->
+        <username>${MAIL_USERNAME}</username>
+        <password>${MAIL_PASSWORD}</password>
+        <asynchronousSending>true</asynchronousSending><!--是否异步-->
+        <SSL>${MAIL_SSL}</SSL>
+        <to>${MAIL_ERROR_TO}</to>
+        <from>${MAIL_USERNAME}</from><!--发件人，名称必须和上面的username保持一致，否则无法发送邮件-->
+        <subject>${EMAIL_SUBJECT}</subject>
+        <!-- html格式-->
+        <layout class="ch.qos.logback.classic.html.HTMLLayout">
+            <Pattern>%date%level%thread%logger{0}%line%message</Pattern>
+        </layout>
+        　　　　 <!-- 这里采用等级过滤器 指定等级相符才发送 -->
+        <!--<filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <!--<cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+            &lt;!&ndash; 每个电子邮件只发送一个日志条目 &ndash;&gt;
+            <bufferSize>1</bufferSize>
+        </cyclicBufferTracker>-->
+    </appender>
+</included>

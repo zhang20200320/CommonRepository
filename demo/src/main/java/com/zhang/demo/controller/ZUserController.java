@@ -51,10 +51,6 @@ public class ZUserController {
 
     @Autowired
     private RedisUtils redisUtils;
-    @Value("${jwt.tokenHeader}")
-    private String tokenHeader;
-    @Value("${jwt.tokenHead}")
-    private String tokenHead;
 
     /**
      * 注册
@@ -84,17 +80,10 @@ public class ZUserController {
     public CommonResult<Map<String, String>> login(@Validated(value = {ZUserForm.ZUserLogin .class}) @RequestBody ZUserForm zUserForm) {
         // 创建之后立刻计时，若想主动开始计时
         Stopwatch stopwatch = Stopwatch.createStarted();
-
-        String token = zUserService.login(zUserForm);
-        if (token == null) {
-            return CommonResult.validateFailed("用户名或密码错误");
-        }
-        Map<String, String> tokenMap = new HashMap<>();
-        tokenMap.put("token", token);
-        tokenMap.put("tokenHead", tokenHead);
+        CommonResult<Map<String, String>> result = zUserService.login(zUserForm);
         // 当前已经消耗的时间
         System.out.println("登录耗时 : " + stopwatch.elapsed(TimeUnit.SECONDS));;
-        return CommonResult.success(tokenMap);
+        return result;
     }
 
     /**
